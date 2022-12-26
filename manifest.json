@@ -1,0 +1,17 @@
+{
+	"manifest_version": 2,
+	"name": "Flow",
+	"version": "0.1",
+	"icons": {
+		"128": "flow.png"
+	},
+	"permissions": [
+		"webview"
+	],
+	"app": {
+		"background": {
+			"scripts": ["background.js"]
+		}
+	},
+	"minimum_chrome_version": "28"
+}

@@ -1,0 +1,529 @@
+:root {
+	--background-colour: #E0E0E0;		/* Gray 300 */
+	--card-background-colour: #212121;	/* Gray 900 */
+	--card-text-colour: white;
+	--card-distance: 16;
+	--window-width: 1;
+	--window-height: 1;
+	--stack-width: 1;
+	--stack-x: 1;
+	--stack-y: 1;
+}
+
+* {
+	backface-visibility: hidden;
+	-webkit-font-smoothing: subpixel-antialiased;
+}
+
+html {
+	height: 100%;
+	/* overflow: visible; */ /* Only when in overview! */
+}
+
+body {
+	min-height: 100%;
+	/* overflow: visible; */
+	margin: 0;
+	font: normal 16px/1.5rem "Fira Sans", sans-serif;
+}
+
+
+/* Overview */
+/************/
+
+.overview {
+	padding: 0.5rem;
+	min-height: calc(100vh - 1rem);
+	background: var(--background-colour) url('assets/background.gif');
+		/* Use gradient from https://stackoverflow.com/questions/35361986/css-gradient-checkerboard-pattern? */
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+	grid-auto-rows: calc(var(--stack-width) * 1px * var(--window-height) / var(--window-width));
+	gap: 1rem;
+	transition: transform 0.5s ease, transform-origin 0.5s ease, grid 0.5s ease;
+}
+
+.stack {
+	position: relative;
+}
+
+.card {
+	width: calc(1px * (var(--stack-width) - 4 * var(--card-distance)));
+	height: calc(1px * (var(--stack-width) - 4 * var(--card-distance)) * var(--window-height) / var(--window-width));
+	position: absolute;
+	top: 1rem;
+	transition: all 0.5s ease;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); /* card-1 */
+	border-radius: 0.5em;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column-reverse;
+	background-color: var(--card-background-colour);
+	color: var(--card-text-colour);
+}
+
+.card.offscreen {
+	top: 100vh;	/* TO DO: place precisely right under stack to decrease speed */
+}
+
+.card.deleting {
+	top: -100vh;	/* TO DO: place precisely right under stack to decrease speed */
+}
+
+.card .page {
+	border-radius: 0.5em;
+	overflow: hidden;
+}
+
+.card .page > webview {
+	width: 100vw;
+	height: 100vh;
+	transform-origin: 0 0;
+	transform: scale(calc((var(--stack-width) - 4 * var(--card-distance)) / var(--window-width)));
+}
+
+.card .info {
+	transition: height 0.5s ease;
+}
+
+.card.active .info {
+	display: flex;
+}
+
+.card:not(.active) .info {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 2em;
+	height: 2em;
+}
+
+.card.active ~ .card:not(.active) .info {
+	left: initial;
+	right: 0;
+	margin-right: -1em;
+}
+
+.card .favicon {
+	width: 2em;
+	height: 2em;
+	border-radius: 2em;
+	overflow: hidden;
+	transform-origin: 0 0;
+	transform: scale(0.5);
+}
+
+.card.active .favicon {
+	margin: 0.5em -0.5em -0.5em 0.5em;
+}
+
+.card:not(.active) .favicon {
+	box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);	/* card-1 */
+}
+
+.card:not(.active) .info-text {
+	display: none;
+}
+
+.card .title {
+	margin: 0;
+	font-size: 1em;
+	line-height: 2em;
+}
+
+.card .url {
+	display: none;
+}
+
+
+/* Stack Positioning */
+/*********************/
+
+.card.active {
+	z-index: 1000;
+	left: calc(2px * var(--card-distance));
+}
+
+/* Placement for up to 20 back cards */
+
+.card:not(.active):first-child {
+	left: calc(0.25px * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) {
+	left: calc(1px * (0.25 + 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 2 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 3 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 4 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 5 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 6 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 7 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 8 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 9 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 10 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 11 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 12 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 13 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 14 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 15 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 16 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 17 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 18 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+.card:not(.active):first-child + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) + .card:not(.active) {
+	left: calc(1px * (0.25 + 19 * 0.875 / (var(--num-back) - 1)) * var(--card-distance));
+}
+
+/* Placement for up to 20 forward cards */
+
+.card.active + .card:last-child {
+	left: calc(3.75px * var(--card-distance));
+}
+
+.card.active + .card {
+	left: calc(2.875px * var(--card-distance));
+}
+
+.card.active + .card + .card {
+	left: calc(1px * (2.875 + 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card {
+	left: calc(1px * (2.875 + 2 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 3 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 4 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 5 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 6 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 7 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 8 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 9 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 10 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 11 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 12 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 13 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 14 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 15 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 16 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 17 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 18 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+.card.active + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card + .card {
+	left: calc(1px * (2.875 + 19 * 0.875 / (var(--num-forward) - 1)) * var(--card-distance));
+}
+
+/* Z-index for up to 20 forward cards */
+
+.card.active ~ .card:nth-last-child(2) {
+	z-index: 1;
+}
+
+.card.active ~ .card:nth-last-child(3) {
+	z-index: 2;
+}
+
+.card.active ~ .card:nth-last-child(4) {
+	z-index: 3;
+}
+
+.card.active ~ .card:nth-last-child(5) {
+	z-index: 4;
+}
+
+.card.active ~ .card:nth-last-child(6) {
+	z-index: 5;
+}
+
+.card.active ~ .card:nth-last-child(7) {
+	z-index: 6;
+}
+
+.card.active ~ .card:nth-last-child(8) {
+	z-index: 7;
+}
+
+.card.active ~ .card:nth-last-child(9) {
+	z-index: 8;
+}
+
+.card.active ~ .card:nth-last-child(10) {
+	z-index: 9;
+}
+
+.card.active ~ .card:nth-last-child(11) {
+	z-index: 10;
+}
+
+.card.active ~ .card:nth-last-child(12) {
+	z-index: 11;
+}
+
+.card.active ~ .card:nth-last-child(13) {
+	z-index: 12;
+}
+
+.card.active ~ .card:nth-last-child(14) {
+	z-index: 13;
+}
+
+.card.active ~ .card:nth-last-child(15) {
+	z-index: 14;
+}
+
+.card.active ~ .card:nth-last-child(16) {
+	z-index: 15;
+}
+
+.card.active ~ .card:nth-last-child(17) {
+	z-index: 16;
+}
+
+.card.active ~ .card:nth-last-child(18) {
+	z-index: 17;
+}
+
+.card.active ~ .card:nth-last-child(19) {
+	z-index: 18;
+}
+
+.card.active ~ .card:nth-last-child(20) {
+	z-index: 19;
+}
+
+
+/* Stack View */
+/*************/
+
+.overview.zoom {
+	transform-origin: 0 0;
+	transform:	scale(calc(var(--window-width) / var(--stack-width)))
+				translate(calc(-1px * var(--stack-x)), calc(-1px * var(--stack-y)));
+}
+
+.zoom .stack {
+	font-size: calc(16px * var(--stack-width) / var(--window-width));
+}
+
+.zoom .card {
+	border-radius: 1em;
+}
+
+.zoom .card .page {
+	border-radius: 1em;
+}
+
+.zoom .card:not(.active) .info {
+	width: 4em;
+	height: 4em;
+	margin: 0.5em 0 0 0.5em;
+}
+
+.zoom .card.active ~ .card:not(.active) .info {
+	margin-right: -1.5em;
+}
+
+.zoom .card .favicon {
+	width: 4em;
+	height: 4em;
+}
+
+.zoom .card.active .info {
+	height: 5em;
+}
+
+.zoom .card.active .favicon {
+	margin: 1em -1em -0.5em 1em;
+}
+
+.zoom .card .title {
+	margin-bottom: -0.5em;
+	font-size: 2em;
+	line-height: 2em;
+}
+
+.zoom .card .url {
+	display: block;
+	margin: 0;
+	font-weight: normal;
+	font-size: 1em;
+	line-height: 2em;
+}
+
+
+/* Page View */
+/*************/
+
+.overview.zoom.fullscreen {
+	transform-origin: 0 0;
+	transform:	scale(calc(var(--window-width) / (var(--stack-width) - 4 * var(--card-distance))))
+				translate(calc(-1px * (var(--stack-x) + 2 * var(--card-distance))), calc(-1px * (var(--stack-y) + var(--card-distance))));
+}
+
+.zoom.fullscreen .card.active {
+	border-radius: initial;
+}
+
+.zoom.fullscreen .active .info {
+	transition: height 0.5s ease 5s;
+	height: 0;
+}
+
+.zoom.fullscreen .active .favicon {
+	z-index: -1;
+}
+
+.zoom.fullscreen .active .page {
+	border-radius: initial;
+}
+
+
+/* New Stack Button */
+
+.new-stack {
+	position: fixed;
+	z-index: 10000;
+	bottom: 0;
+	width: 100%;
+	text-align: center;
+}
+
+.new-stack input {
+	width: calc(100% - 6rem);
+	height: 2rem;
+	margin-bottom: 0.5rem;
+	padding: 0.25rem 1rem 0.25rem 2.5rem;
+	border: none;
+	border-radius: 2rem;
+	font-size: 1rem;
+	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23); /* card-2 */
+	background: white url(assets/add.svg) no-repeat scroll 0.5rem;
+}
+
+.new-stack input.link {
+	background-image: url(assets/link.svg);
+}
+
+.new-stack input.google {
+	background-image: url(assets/google-brands.svg);
+}
+
+.new-stack input.wikipedia {
+	background-image: url(assets/wikipedia-w-brands.svg);
+}
+
+.new-stack input:focus {
+	box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22); /* card-4 */
+	outline: none;
+}
+
+.fullscreen + .new-stack {
+	display: none;
+}
+
+/* Navigation */
+
+.overview:not(.zoom) webview,
+.card:not(.active) webview,
+.inactive webview {
+	pointer-events: none;
+}
